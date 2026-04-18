@@ -3,17 +3,21 @@ import { motion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Award, ChevronRight, Clock, MapPin, Zap, ArrowLeft, Trophy, Utensils } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useDemo } from '../context/DemoContext';
 
 const RunCompletionSummary = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { routeState, runState } = useDemo();
   const stats = location.state || {
-    time: "25:42",
-    distance: "3.20",
-    pace: "5'12\"",
-    checkpoints: 1,
-    routeName: "Ancient Temple Path",
-    routeType: "Historical"
+    time: `${Math.floor(runState.duration / 60)
+      .toString()
+      .padStart(2, '0')}:${(runState.duration % 60).toString().padStart(2, '0')}`,
+    distance: runState.distance.toFixed(2),
+    pace: runState.pace,
+    checkpoints: runState.landmarkTriggered ? 1 : 0,
+    routeName: routeState.selectedRouteName || 'Ancient Temple Path',
+    routeType: routeState.selectedRouteType || 'Historical',
   };
 
   const isHistorical = stats.routeType === "Historical";

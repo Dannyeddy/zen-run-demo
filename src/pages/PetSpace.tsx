@@ -4,10 +4,12 @@ import { Heart, Zap, Star, Trophy, MessageCircle, Utensils, Sparkles, Gift } fro
 import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
 import { cn } from '../lib/utils';
+import { useDemo } from '../context/DemoContext';
 
 const PetSpace = () => {
   const navigate = useNavigate();
   const { equippedItem, foodInventory, petVitality, petAffinity, feedPet } = usePet();
+  const { selectedCompanion } = useDemo();
   const [showFeedPanel, setShowFeedPanel] = React.useState(false);
   const [isFeeding, setIsFeeding] = React.useState(false);
   const [showHeart, setShowHeart] = React.useState(false);
@@ -46,7 +48,9 @@ const PetSpace = () => {
             <Star size={16} fill="currentColor" />
             <span className="text-[11px] font-black uppercase tracking-[0.2em]">Companion Sanctuary</span>
           </div>
-          <h1 className="text-5xl font-display font-bold text-text-main tracking-tight">Aqua Pup</h1>
+          <h1 className="text-5xl font-display font-bold text-text-main tracking-tight">
+            {selectedCompanion?.name ?? 'Aqua Pup'}
+          </h1>
           <p className="text-text-muted text-lg font-medium italic opacity-80">"Your faithful guide through the waves of serenity."</p>
         </header>
 
@@ -98,7 +102,7 @@ const PetSpace = () => {
               {/* The Pet Avatar */}
               <div className="relative">
                 <img 
-                  src="https://api.dicebear.com/7.x/bottts/svg?seed=aqua&backgroundColor=b6e3f4" 
+                  src={selectedCompanion?.img ?? 'https://api.dicebear.com/7.x/bottts/svg?seed=aqua&backgroundColor=b6e3f4'} 
                   alt="Pet" 
                   className="w-72 h-72 md:w-96 md:h-96 drop-shadow-[0_35px_35px_rgba(126,232,224,0.4)]"
                   referrerPolicy="no-referrer"

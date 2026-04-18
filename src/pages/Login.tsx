@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, ChevronRight, User } from 'lucide-react';
+import { useDemo } from '../context/DemoContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { companions, setUserProfile } = useDemo();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
 
-  const pets = [
-    { id: 1, name: 'Aqua Pup', type: 'Energetic', img: 'https://api.dicebear.com/7.x/bottts/svg?seed=aqua&backgroundColor=b6e3f4' },
-    { id: 2, name: 'Mint Cat', type: 'Calm', img: 'https://api.dicebear.com/7.x/bottts/svg?seed=mint&backgroundColor=b6e3f4' },
-    { id: 3, name: 'Zen Fox', type: 'Wise', img: 'https://api.dicebear.com/7.x/bottts/svg?seed=zen&backgroundColor=b6e3f4' },
-  ];
-
   const handlePetSelect = () => {
-    // Navigate to onboarding instead of home directly
+    if (!selectedPet) {
+      return;
+    }
+
+    setUserProfile(name, selectedPet);
     navigate('/onboarding');
   };
 
@@ -90,7 +90,7 @@ const Login = () => {
               <p className="text-text-muted text-sm font-medium opacity-70">They will evolve alongside your spirit.</p>
             </div>
             <div className="grid grid-cols-1 gap-4">
-              {pets.map((pet) => (
+              {companions.map((pet) => (
                 <motion.div 
                   key={pet.id}
                   whileHover={{ x: 8, scale: 1.01 }}

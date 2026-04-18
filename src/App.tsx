@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import Home from './pages/Home';
 import Tracker from './pages/Tracker';
@@ -14,6 +20,7 @@ import HistoricalRewardResult from './pages/HistoricalRewardResult';
 import ModernRewardResult from './pages/ModernRewardResult';
 import Onboarding from './pages/Onboarding';
 import Navbar from './components/Navbar';
+import { DemoProvider, useDemo } from './context/DemoContext';
 import { PetProvider } from './context/PetContext';
 
 // Scroll to top on route change
@@ -27,13 +34,31 @@ const ScrollToTop = () => {
 
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const { userState } = useDemo();
+
+  const needsLogin = !userState.userName || !userState.selectedCompanion;
+  const needsOnboarding = !needsLogin && !userState.onboardingSeen;
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location}>
         <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/onboarding"
+          element={needsLogin ? <Navigate to="/login" replace /> : <Onboarding />}
+        />
+        <Route
+          path="/"
+          element={
+            needsLogin ? (
+              <Navigate to="/login" replace />
+            ) : needsOnboarding ? (
+              <Navigate to="/onboarding" replace />
+            ) : (
+              <Home />
+            )
+          }
+        />
         <Route path="/tracker" element={<Tracker />} />
         <Route path="/pet-space" element={<PetSpace />} />
         <Route path="/treasure" element={<Treasure />} />
@@ -65,9 +90,11 @@ export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <PetProvider>
-        <AppContent />
-      </PetProvider>
+      <DemoProvider>
+        <PetProvider>
+          <AppContent />
+        </PetProvider>
+      </DemoProvider>
     </Router>
   );
 }

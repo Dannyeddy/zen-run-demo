@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, Home, Box, RefreshCcw, Info, Star } from 'lucide-react';
+import { useDemo } from '../context/DemoContext';
 
 const HistoricalRewardResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const stats = location.state || { routeName: "Ancient Temple Path" };
+  const { rewardState, routeState, saveHistoricalReward, selectRoute, selectedRoute } = useDemo();
+  const stats = location.state || { routeName: routeState.selectedRouteName || 'Ancient Temple Path' };
+
+  useEffect(() => {
+    saveHistoricalReward();
+  }, [saveHistoricalReward]);
+
+  const rewardTitle = rewardState.rewardName || 'Ancient Silk Fan';
+  const rewardImage = rewardState.rewardImage;
+  const routeName = stats.routeName || routeState.selectedRouteName || 'Ancient Temple Path';
+  const rerunRoute = useMemo(() => selectedRoute, [selectedRoute]);
 
   return (
     <motion.div 
@@ -30,9 +41,9 @@ const HistoricalRewardResult = () => {
             <span className="text-[12px] font-black uppercase tracking-[0.6em]">Treasure Unearthed</span>
             <Sparkles size={24} />
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-none">Ancient Silk Fan</h1>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-none">{rewardTitle}</h1>
           <div className="text-amber-400 font-black text-xs uppercase tracking-widest bg-amber-400/10 px-4 py-1.5 rounded-full border border-amber-400/20">
-            Relic of Beisi Pagoda
+            Relic of {routeName}
           </div>
         </div>
 
@@ -48,7 +59,7 @@ const HistoricalRewardResult = () => {
             <div className="absolute inset-0 bg-brand/20 blur-[60px] rounded-full animate-pulse" />
              {/* The image itself */}
              <img 
-              src="https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=800"
+              src={rewardImage}
               alt="Treasure"
               className="w-full h-full object-cover rounded-[60px] border-4 border-brand/30 shadow-[0_0_100px_rgba(126,232,224,0.3)] relative z-10 brightness-110 sepia-[0.3]"
               referrerPolicy="no-referrer"
@@ -62,7 +73,7 @@ const HistoricalRewardResult = () => {
 
         <div className="card-rounded p-10 bg-white/5 border border-white/10 backdrop-blur-md max-w-lg w-full text-center space-y-6">
           <p className="text-white/80 text-base leading-relaxed font-medium">
-            "This delicate artifact was whispered of in local legends. By completing the Beisi Pagoda route, you have restored its legacy in the spiritual archives."
+            {`"This delicate artifact was whispered of in local legends. By completing the ${routeName} route, you have restored its legacy in the spiritual archives."`}
           </p>
           <div className="flex items-center justify-center gap-4 py-4 bg-brand/5 rounded-2xl border border-brand/10">
             <Info className="text-brand" size={20} />
@@ -88,7 +99,14 @@ const HistoricalRewardResult = () => {
         </div>
 
         <button 
-          onClick={() => navigate('/tracker')}
+          onClick={() => {
+            if (rerunRoute) {
+              selectRoute(rerunRoute);
+              navigate('/tracker', { state: { route: rerunRoute } });
+              return;
+            }
+            navigate('/tracker');
+          }}
           className="flex items-center gap-3 text-white/40 hover:text-brand transition-colors text-sm font-black uppercase tracking-[0.4em]"
         >
           <RefreshCcw size={16} /> Re-Run Route

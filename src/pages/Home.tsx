@@ -1,64 +1,42 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, MapPin, Heart, Zap, ChevronRight, Star, X, Info, Trophy, Compass, Utensils } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { useDemo } from '../context/DemoContext';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'historical' | 'modern'>('historical');
+  const {
+    routes,
+    routeState,
+    selectedCompanion,
+    userState,
+    selectRoute,
+    startRun: startRunSession,
+  } = useDemo();
+  const [activeTab, setActiveTab] = useState<'historical' | 'modern'>(
+    routeState.selectedRouteType === 'Modern' ? 'modern' : 'historical',
+  );
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
 
-  const routes = [
-    { 
-      id: 'h1',
-      title: 'Ancient Temple Path', 
-      dist: '3.2 km', 
-      time: '25 min', 
-      type: 'Historical', 
-      reward: 'Ancient Silk Fan',
-      description: 'Explore the remnants of the Ming dynasty gardens. This path hides fragments of lost history.',
-      img: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=400' 
-    },
-    { 
-      id: 'm1',
-      title: 'Riverside Serenity', 
-      dist: '5.0 km', 
-      time: '40 min', 
-      type: 'Modern', 
-      reward: 'Premium Pet Food',
-      description: 'A smooth asphalt path along the river. Perfect for maintaining peak vitality.',
-      img: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=400' 
-    },
-    { 
-      id: 'h2',
-      title: 'Silk Road Echoes', 
-      dist: '6.4 km', 
-      time: '50 min', 
-      type: 'Historical', 
-      reward: 'Jade Ornament',
-      description: 'Trace the steps of ancient traders through this desert-inspired landscape.',
-      img: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?auto=format&fit=crop&q=80&w=400' 
-    },
-    { 
-      id: 'm2',
-      title: 'Urban Jungle Beat', 
-      dist: '3.5 km', 
-      time: '22 min', 
-      type: 'Modern', 
-      reward: 'Energy Mix',
-      description: 'Navigate through the city park with high intensity sprints.',
-      img: 'https://images.unsplash.com/photo-1444418185997-1145401101e0?auto=format&fit=crop&q=80&w=400' 
-    }
-  ];
-
-  const filteredRoutes = routes.filter(r => r.type.toLowerCase() === activeTab);
+  const filteredRoutes = useMemo(
+    () => routes.filter((r) => r.type.toLowerCase() === activeTab),
+    [activeTab, routes],
+  );
 
   const handleRouteClick = (route: any) => {
+    selectRoute(route);
     setSelectedRoute(route);
   };
 
   const startRun = () => {
+    if (!selectedRoute) {
+      return;
+    }
+
+    selectRoute(selectedRoute);
+    startRunSession();
     navigate('/tracker', { state: { route: selectedRoute } });
   };
 
@@ -83,7 +61,7 @@ const Home = () => {
               className="w-12 h-12 rounded-full border-2 border-brand p-1 bg-white shadow-sm cursor-pointer"
             >
               <img 
-                src="https://api.dicebear.com/7.x/bottts/svg?seed=fluid-pet&backgroundColor=b6e3f4" 
+                src={selectedCompanion?.img ?? 'https://api.dicebear.com/7.x/bottts/svg?seed=fluid-pet&backgroundColor=b6e3f4'} 
                 alt="Pet Avatar" 
                 className="w-full h-full rounded-full"
                 referrerPolicy="no-referrer"
@@ -103,6 +81,9 @@ const Home = () => {
                 Discover your <br />
                 <span className="text-brand-dark italic">vitality path.</span>
               </h2>
+              <p className="text-sm text-text-muted font-medium">
+                {userState.userName ? `${userState.userName}, your next story run is ready.` : 'Your next story run is ready.'}
+              </p>
             </div>
           </div>
 
@@ -114,15 +95,19 @@ const Home = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full -mr-12 -mt-12" />
             <div className="w-20 h-20 bg-brand/10 rounded-[28px] flex items-center justify-center relative z-10 shrink-0">
               <img 
-                src="https://api.dicebear.com/7.x/bottts/svg?seed=fluid-pet&backgroundColor=b6e3f4" 
+                src={selectedCompanion?.img ?? 'https://api.dicebear.com/7.x/bottts/svg?seed=fluid-pet&backgroundColor=b6e3f4'} 
                 alt="Pet" 
                 className="w-14 h-14"
                 referrerPolicy="no-referrer"
               />
             </div>
             <div className="flex-1 relative z-10 text-left">
-              <div className="text-lg font-bold text-text-main">Aqua Companion</div>
-              <p className="text-xs text-text-muted mt-1 font-medium">Level 4 Wellness Explorer</p>
+              <div className="text-lg font-bold text-text-main">
+                {selectedCompanion?.name ?? 'Aqua Companion'}
+              </div>
+              <p className="text-xs text-text-muted mt-1 font-medium">
+                {selectedCompanion?.type ?? 'Energetic'} Wellness Explorer
+              </p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex-1 h-2 bg-surface rounded-full overflow-hidden">
                   <motion.div 

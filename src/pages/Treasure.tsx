@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Gift, Star, MapPin, Lock, Search, X, Check, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePet } from '../context/PetContext';
+import { useDemo } from '../context/DemoContext';
 
 const Treasure = () => {
   const navigate = useNavigate();
   const { equipItem, equippedItem } = usePet();
+  const { treasureRewards } = useDemo();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isEquipping, setIsEquipping] = useState(false);
 
-  const treasures = [
+  const defaultTreasures = [
     { id: 1, title: 'Ancient Coin', rarity: 'Rare', type: 'Relic', img: 'https://images.unsplash.com/photo-1589476993333-f55b84301219?auto=format&fit=crop&q=80&w=200', locked: false },
     { id: 2, title: 'Temple Map', rarity: 'Common', type: 'Scroll', img: 'https://images.unsplash.com/photo-1586444248902-2f64eddf13cf?auto=format&fit=crop&q=80&w=200', locked: false },
     { id: 3, title: 'Vitality Orb', rarity: 'Epic', type: 'Essence', img: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&q=80&w=200', locked: false },
@@ -18,6 +20,17 @@ const Treasure = () => {
     { id: 5, title: 'Jade Flute', rarity: 'Rare', type: 'Instrument', img: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=200', locked: true },
     { id: 6, title: 'Lotus Seed', rarity: 'Uncommon', type: 'Seed', img: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=200', locked: true },
   ];
+
+  const storedTreasures = treasureRewards.map((reward, index) => ({
+    id: Number(`9${index + 1}`),
+    title: reward.rewardName,
+    rarity: 'Legendary',
+    type: 'Relic',
+    img: reward.rewardImage,
+    locked: false,
+  }));
+
+  const treasures = [...storedTreasures, ...defaultTreasures];
 
   const handleEquip = () => {
     if (!selectedItem) return;
